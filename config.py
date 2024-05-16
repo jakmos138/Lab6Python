@@ -1,22 +1,47 @@
 import json
+import sys
 
-def collect_configuration():
-    config = {}
-    config['web_server_log'] = input("Enter the name of the web server log: ")
-    config['ip_address'] = input("Enter the IP address to be used as a filter: ")
-    config['logging_level'] = input("Enter the logging level used by the application: ")
-    config['lines_to_display'] = int(input("Enter the number of lines to be displayed at once: "))
-    config['custom_parameter'] = input("Enter your own parameter: ")
+configName = 'config.json'
 
-    return config
+configDict = {
+    'logName' : '',
+    'ipAddress' : '',
+    'loggingLevel' : 0,
+    'linesAtOnce' : 0,
+    'maxSize' : 0
+}
 
-def save_config(config, filename, encoding='utf-8'):
-    with open(filename, 'w', encoding=encoding) as file:
-        json.dump(config, file, ensure_ascii=False, indent=4)
+if __name__ == '__main__':
+    try:
+        f = open(configName, 'r')
+        configDict = json.load(f)
+        print("Current config values:")
+        for name, value in configDict.items():
+            print("\t{}: {}".format(name, value))
+        f.close()
 
-def main():
-    config = collect_configuration()
-    save_config(config, 'config.json', encoding='utf-8')
+        decision = input("Do you wanna change config file?[Y/N]")
+        if decision.lower() not in ['y','yes']:
+            sys.exit()
 
-if __name__ == "__main__":
-    main()
+    except FileNotFoundError:
+        print("You don't have config file yet!")
+    
+    for name in configDict.keys():
+        typeOfInput = type(configDict[name])
+        newValue = input("Input new value of {}. Press Enter to continue. (Expected input:{}) ".format(name, typeOfInput))
+        if not newValue:
+            continue
+        try:
+            newValue = typeOfInput(newValue)
+            configDict[name] = newValue
+        except:
+            print("Invalid Input")
+        
+    configFile = open(configName, 'w')
+    json.dump(configDict, configFile)
+    configFile.close()
+    
+    
+
+    
